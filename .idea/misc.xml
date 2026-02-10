@@ -3,4 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.10 (Nvidia-Finance-Rag)" />
   </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12 (Nvidia-Finance-Rag)" project-jdk-type="Python SDK" />
 </project>

@@ -11,10 +11,10 @@ OUTPUT_FOLDER = "../processed_data"
 IMAGE_FOLDER = os.path.join(OUTPUT_FOLDER, "images")
 
 # --- 健壮性提升：在初始化时检查API Key ---
-API_KEY = os.getenv("ZHIPU_API_KEY")
+API_KEY = os.getenv("ZHIPUAI_API_KEY")
 ZHIPU_CLIENT = None
 if not API_KEY:
-    print("警告: 环境变量 ZHIPU_API_KEY 未设置，表格摘要功能将不可用。")
+    print("警告: 环境变量 ZHIPUAI_API_KEY 未设置，表格摘要功能将不可用。")
 else:
     try:
         ZHIPU_CLIENT = ZhipuAI(api_key=API_KEY)

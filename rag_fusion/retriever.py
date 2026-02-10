@@ -1,17 +1,22 @@
 # rag_fusion/retriever.py
 
 import os
+import re
 from typing import List, Dict, Any
-from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.documents import Document
 from zhipuai import ZhipuAI
+from pymilvus import connections, Collection, utility
+from rank_bm25 import BM25Okapi
 import config
+import jieba
 
 # --- 全局变量，用于缓存 ---
 db_client = None
 embedding_model = None
 llm_client = None
+bm25_index = None
+bm25_docs = None
 
 
 def get_llm_client():
@@ -19,7 +24,7 @@ def get_llm_client():
     global llm_client
     if llm_client is None:
         if not config.LLM_API_KEY or config.LLM_API_KEY == "你的智谱AI API Key":
-            raise ValueError("请在 config.py 文件中设置你的 ZHIPU_API_KEY")
+            raise ValueError("请在 config.py 文件中设置你的 ZHIPUAI_API_KEY")
         llm_client = ZhipuAI(api_key=config.LLM_API_KEY)
     return llm_client
 
@@ -41,14 +46,130 @@ def get_db_client():
     """获取向量数据库客户端的单例。"""
     global db_client
     if db_client is None:
-        if not os.path.exists(config.VECTOR_DB_PATH):
-            raise FileNotFoundError(f"向量数据库路径不存在: {config.VECTOR_DB_PATH}。请先运行 build_vectorstore.py。")
-        print("正在加载向量数据库...")
-        db_client = Chroma(
-            persist_directory=config.VECTOR_DB_PATH,
-            embedding_function=get_embedding_model()
-        )
+        print("正在连接Milvus数据库...")
+        try:
+            # 连接到Milvus
+            connections.connect("default", host=config.MILVUS_HOST, port=config.MILVUS_PORT)
+            
+            # 检查集合是否存在
+            if not utility.has_collection(config.MILVUS_COLLECTION):
+                raise FileNotFoundError(f"Milvus集合不存在: {config.MILVUS_COLLECTION}。请先运行 build_vectorstore.py。")
+            
+            # 加载集合
+            collection = Collection(config.MILVUS_COLLECTION)
+            collection.load()
+            db_client = collection
+            print("Milvus数据库连接成功！")
+        except Exception as e:
+            raise Exception(f"连接Milvus数据库失败: {e}")
     return db_client
+
+
+def get_bm25_index():
+    """获取BM25索引的单例。"""
+    global bm25_index, bm25_docs
+    if bm25_index is None or bm25_docs is None:
+        print("正在构建BM25索引...")
+        # 加载所有文档内容
+        bm25_docs = _load_all_documents_for_bm25()
+        
+        # 对文档内容进行分词处理
+        tokenized_corpus = []
+        for doc in bm25_docs:
+            # 分词
+            tokens = tokenize_text(doc.page_content)
+            tokenized_corpus.append(tokens)
+        
+        # 构建BM25索引
+        bm25_index = BM25Okapi(tokenized_corpus)
+        print(f"BM25索引构建完成，包含 {len(bm25_docs)} 个文档")
+    return bm25_index, bm25_docs
+
+
+def tokenize_text(text):
+    """对文本进行分词处理。"""
+    # 移除特殊字符
+    text = re.sub(r'[\s\n\r\t]+', ' ', text)
+    text = re.sub(r'[^\w\s\u4e00-\u9fa5]', '', text)
+    
+    # 分词
+    if any('\u4e00' <= char <= '\u9fa5' for char in text):
+        # 中文文本使用jieba分词
+        tokens = list(jieba.cut_for_search(text))
+    else:
+        # 英文文本使用空格分词
+        tokens = text.lower().split()
+    
+    # 过滤停用词
+    stop_words = set(['的', '了', '是', '在', '我', '有', '和', '就', '不', '人', '都', '一', '一个', '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没有', '看', '好', '自己', '这'])
+    tokens = [token for token in tokens if token not in stop_words and len(token) > 1]
+    
+    return tokens
+
+
+def _load_all_documents_for_bm25():
+    """加载所有文档内容用于构建BM25索引。"""
+    import json
+    
+    processed_data_folder = "d:\\LLM\\RAG\\Nvidia-Finance-Rag\\processed_data"
+    docs = []
+    
+    # 加载图片摘要
+    image_summaries_path = os.path.join(processed_data_folder, "image_summaries.json")
+    image_summaries = {}
+    if os.path.exists(image_summaries_path):
+        with open(image_summaries_path, 'r', encoding='utf-8') as f:
+            image_summaries = json.load(f)
+    
+    # 处理PDF解析文件
+    for filename in os.listdir(processed_data_folder):
+        if filename.endswith(".json") and filename != "image_summaries.json":
+            file_path = os.path.join(processed_data_folder, filename)
+            with open(file_path, 'r', encoding='utf-8') as f:
+                blocks = json.load(f)
+            
+            pages = {}
+            for block in blocks:
+                page_num = block["metadata"]["page"]
+                if page_num not in pages:
+                    pages[page_num] = []
+                
+                content = block["content"]
+                if block["type"] == "image_placeholder":
+                    img_name = content.replace("[IMAGE: ", "").replace("]", "")
+                    summary = image_summaries.get(img_name, "")
+                    content = f"--- [参考图片: {img_name}] ---\n{summary}\n--- [图片描述结束] ---"
+                
+                pages[page_num].append(content)
+            
+            for page_num, contents in sorted(pages.items()):
+                full_page_content = "\n\n".join(contents)
+                doc = Document(
+                    page_content=full_page_content,
+                    metadata={
+                        "source": filename.replace("_processed.json", ""),
+                        "page": page_num
+                    }
+                )
+                docs.append(doc)
+    
+    # 处理音频转录稿
+    for filename in os.listdir(processed_data_folder):
+        if filename.endswith("_transcribed.txt"):
+            file_path = os.path.join(processed_data_folder, filename)
+            with open(file_path, 'r', encoding='utf-8') as f:
+                full_text = f.read()
+            
+            doc = Document(
+                page_content=full_text,
+                metadata={
+                    "source": filename.replace("_transcribed.txt", ""),
+                    "page": 1
+                }
+            )
+            docs.append(doc)
+    
+    return docs
 
 
 def generate_queries(original_query: str) -> List[str]:
@@ -78,26 +199,121 @@ def generate_queries(original_query: str) -> List[str]:
 def parallel_search(queries: List[str]) -> Dict[str, List[Document]]:
     """对每个查询并行执行摘要和子块的搜索。"""
     print("\n--- 步骤 2: 执行并行检索 ---")
-    db = get_db_client()
+    collection = get_db_client()
+    embedding_model = get_embedding_model()
+    bm25_index, bm25_docs = get_bm25_index()
     all_results = {}
+
+    # 搜索参数
+    search_params = {
+        "metric_type": "L2",
+        "params": {
+            "ef": 64
+        }
+    }
 
     for query in queries:
         print(f"  - 正在搜索: '{query}'")
 
+        # 生成查询向量
+        query_embedding = embedding_model.embed_query(query)
+
         # 路径A: 搜索摘要
-        summary_results = db.similarity_search(
-            query, k=config.RETRIEVAL_K, filter={"is_summary": {"$eq": True}}
+        expr_summary = "is_summary == True"
+        summary_results_milvus = collection.search(
+            data=[query_embedding],
+            anns_field="embedding",
+            param=search_params,
+            limit=config.RETRIEVAL_K,
+            expr=expr_summary,
+            output_fields=["id", "content", "source", "page", "doc_id", "is_summary"]
         )
 
         # 路径B: 搜索子块
-        chunk_results = db.similarity_search(
-            query, k=config.RETRIEVAL_K, filter={"is_child": {"$eq": True}}
+        expr_child = "is_child == True"
+        chunk_results_milvus = collection.search(
+            data=[query_embedding],
+            anns_field="embedding",
+            param=search_params,
+            limit=config.RETRIEVAL_K,
+            expr=expr_child,
+            output_fields=["id", "content", "source", "page", "doc_id", "is_child", "chunk_index"]
         )
 
-        all_results[query] = summary_results + chunk_results
-        print(f"    - 命中 {len(summary_results)} 个摘要，{len(chunk_results)} 个子块。")
+        # 路径C: 使用BM25搜索
+        bm25_results = _bm25_search(query, bm25_index, bm25_docs, k=config.RETRIEVAL_K)
+
+        # 将Milvus结果转换为Document对象
+        summary_docs = []
+        for hit in summary_results_milvus[0]:
+            metadata = {
+                "source": hit.entity.get("source", ""),
+                "page": hit.entity.get("page", 0),
+                "doc_id": hit.entity.get("doc_id", ""),
+                "is_summary": hit.entity.get("is_summary", False),
+                "score_type": "hnsw"
+            }
+            doc = Document(
+                page_content=hit.entity.get("content", ""),
+                metadata=metadata
+            )
+            summary_docs.append(doc)
+
+        chunk_docs = []
+        for hit in chunk_results_milvus[0]:
+            metadata = {
+                "source": hit.entity.get("source", ""),
+                "page": hit.entity.get("page", 0),
+                "doc_id": hit.entity.get("doc_id", ""),
+                "is_child": hit.entity.get("is_child", False),
+                "chunk_index": hit.entity.get("chunk_index", -1),
+                "score_type": "hnsw"
+            }
+            doc = Document(
+                page_content=hit.entity.get("content", ""),
+                metadata=metadata
+            )
+            chunk_docs.append(doc)
+
+        # 合并所有结果，**不**去重，保留同一文档在不同路径中的排名信息
+        all_docs = summary_docs + chunk_docs + bm25_results
+        
+        all_results[query] = all_docs
+        print(f"    - 路径A: {len(summary_docs)} 个摘要, 路径B: {len(chunk_docs)} 个子块, 路径C: {len(bm25_results)} 个BM25结果, 总计: {len(all_docs)} 个结果。")
 
     return all_results
+
+
+def _bm25_search(query, bm25_index, bm25_docs, k=5):
+    """使用BM25进行文本搜索。"""
+    # 对查询进行分词
+    query_tokens = tokenize_text(query)
+    
+    # 执行BM25搜索
+    scores = bm25_index.get_scores(query_tokens)
+    
+    # 排序并获取前k个结果
+    top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:k]
+    
+    # 构建结果列表
+    results = []
+    for idx in top_indices:
+        doc = bm25_docs[idx]
+        # 添加BM25分数到元数据
+        metadata = doc.metadata.copy()
+        metadata["score_type"] = "bm25"
+        metadata["bm25_score"] = scores[idx]
+        
+        result_doc = Document(
+            page_content=doc.page_content,
+            metadata=metadata
+        )
+        results.append(result_doc)
+    
+    return results
+
+
+
 
 
 def reciprocal_rank_fusion(search_results: Dict[str, List[Document]], k: int = 60) -> List[Document]:

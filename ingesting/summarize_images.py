@@ -4,7 +4,7 @@ import base64
 import json
 import time
 
-API_KEY = os.getenv("ZHIPU_API_KEY")
+API_KEY = os.getenv("ZHIPUAI_API_KEY")
 
 IMAGE_FOLDER = os.path.join("../processed_data", "images")
 OUTPUT_FILE = os.path.join("../processed_data", "image_summaries.json")
@@ -74,7 +74,7 @@ def summarize_and_clean():
             print(f"正在处理图片 ({index + 1}/{len(images_to_process)}): {filename}...")
 
             response = client.chat.completions.create(
-                model="glm-4v",
+                model="GLM-4.6V-Flash",
                 messages=[{"role": "user", "content": [{"type": "text", "text": PROMPT}, {"type": "image_url",
                                                                                           "image_url": {
                                                                                               "url": f"data:image/png;base64,{base64_image}"}}]}]

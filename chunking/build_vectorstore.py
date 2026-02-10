@@ -3,14 +3,18 @@ import json
 import shutil
 import uuid
 from langchain_core.documents import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from zhipuai import ZhipuAI
+from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
 
 # --- 配置 ---
-PROCESSED_DATA_FOLDER = "../processed_data"
-VECTOR_DB_PATH = "../chroma_db_optimized"
+# 使用绝对路径
+PROCESSED_DATA_FOLDER = "d:\\LLM\\RAG\\Nvidia-Finance-Rag\\processed_data"
+# Milvus配置
+MILVUS_HOST = "localhost"
+MILVUS_PORT = 19530
+MILVUS_COLLECTION = "nvidia_finance_rag"
 EMBEDDING_MODEL_NAME = "BAAI/bge-m3"
 
 # --- 初始化 LLM 用于生成摘要 ---
@@ -155,40 +159,168 @@ def create_child_chunks_and_summaries(parent_docs):
 def create_and_persist_vector_store(docs_to_index, embeddings):
     """创建并持久化向量库。"""
     print("\n--- 步骤三: 嵌入数据并构建向量库 ---")
-    if os.path.exists(VECTOR_DB_PATH):
-        print(f"  - 发现旧的数据库，正在删除: {VECTOR_DB_PATH}")
-        shutil.rmtree(VECTOR_DB_PATH)
-
-    Chroma.from_documents(docs_to_index, embeddings, persist_directory=VECTOR_DB_PATH)
-    print("  - 向量数据库创建完毕并已成功持久化！")
+    
+    # 连接到Milvus
+    print(f"  - 连接到Milvus: {MILVUS_HOST}:{MILVUS_PORT}")
+    connections.connect("default", host=MILVUS_HOST, port=MILVUS_PORT)
+    
+    # 检查集合是否存在，如果存在则删除
+    if utility.has_collection(MILVUS_COLLECTION):
+        print(f"  - 发现旧的集合，正在删除: {MILVUS_COLLECTION}")
+        utility.drop_collection(MILVUS_COLLECTION)
+    
+    # 创建字段
+    fields = [
+        FieldSchema(name="id", dtype=DataType.VARCHAR, max_length=40, is_primary=True),
+        FieldSchema(name="content", dtype=DataType.VARCHAR, max_length=65535),
+        FieldSchema(name="source", dtype=DataType.VARCHAR, max_length=255),
+        FieldSchema(name="page", dtype=DataType.INT32),
+        FieldSchema(name="doc_id", dtype=DataType.VARCHAR, max_length=36),
+        FieldSchema(name="is_child", dtype=DataType.BOOL, default_value=False),
+        FieldSchema(name="is_summary", dtype=DataType.BOOL, default_value=False),
+        FieldSchema(name="chunk_index", dtype=DataType.INT64, default_value=-1),
+        FieldSchema(name="embedding", dtype=DataType.FLOAT_VECTOR, dim=1024)  # BAAI/bge-m3 模型的维度
+    ]
+    
+    # 创建集合
+    schema = CollectionSchema(fields, description="NVIDIA财务报告RAG向量库")
+    collection = Collection(MILVUS_COLLECTION, schema)
+    print(f"  - 集合创建成功: {MILVUS_COLLECTION}")
+    
+    # 准备数据
+    print("  - 正在处理文档并生成嵌入向量...")
+    data = []
+    for doc in docs_to_index:
+        # 生成唯一ID
+        doc_id = doc.metadata.get("doc_id", str(uuid.uuid4()))
+        chunk_index = doc.metadata.get("chunk_index", -1)
+        if chunk_index != -1:
+            # 使用前32个字符的doc_id加上4位chunk_index
+            short_doc_id = doc_id.replace("-", "")[:32]
+            unique_id = f"{short_doc_id}{chunk_index:04d}"
+            # 确保长度不超过36个字符
+            unique_id = unique_id[:36]
+        else:
+            unique_id = doc_id
+        
+        # 生成嵌入向量
+        embedding = embeddings.embed_query(doc.page_content)
+        
+        # 提取元数据
+        source = doc.metadata.get("source", "")
+        page = doc.metadata.get("page", 0)
+        is_child = doc.metadata.get("is_child", False)
+        is_summary = doc.metadata.get("is_summary", False)
+        
+        # 添加到数据列表
+        data.append({
+            "id": unique_id,
+            "content": doc.page_content,
+            "source": source,
+            "page": page,
+            "doc_id": doc_id,
+            "is_child": is_child,
+            "is_summary": is_summary,
+            "chunk_index": chunk_index,
+            "embedding": embedding
+        })
+    
+    # 批量插入数据
+    print(f"  - 正在插入 {len(data)} 条数据...")
+    collection.insert([
+        [item["id"] for item in data],
+        [item["content"] for item in data],
+        [item["source"] for item in data],
+        [item["page"] for item in data],
+        [item["doc_id"] for item in data],
+        [item["is_child"] for item in data],
+        [item["is_summary"] for item in data],
+        [item["chunk_index"] for item in data],
+        [item["embedding"] for item in data]
+    ])
+    
+    # 创建索引
+    print("  - 正在创建索引...")
+    index_params = {
+        "index_type": "HNSW",
+        "metric_type": "L2",
+        "params": {
+            "M": 8,
+            "efConstruction": 64
+        }
+    }
+    collection.create_index("embedding", index_params)
+    
+    # 加载集合到内存
+    collection.load()
+    print("  - 向量数据库创建完毕并已成功加载到内存！")
+    
+    return collection
 
 
 def verify_retrieval(embeddings):
     """验证检索效果。"""
     print("\n--- 步骤四: 验证检索效果 ---")
-    if not os.path.exists(VECTOR_DB_PATH):
-        print("数据库不存在，无法验证。")
+    
+    # 连接到Milvus
+    try:
+        connections.connect("default", host=MILVUS_HOST, port=MILVUS_PORT)
+    except Exception as e:
+        print(f"连接Milvus失败: {e}")
         return
-
-    db = Chroma(persist_directory=VECTOR_DB_PATH, embedding_function=embeddings)
-
+    
+    # 检查集合是否存在
+    if not utility.has_collection(MILVUS_COLLECTION):
+        print("集合不存在，无法验证。")
+        return
+    
+    # 加载集合
+    collection = Collection(MILVUS_COLLECTION)
+    collection.load()
+    
     # 验证一个来自音频转录稿的查询
     query = "are there other that have yet to be announced of the same kind of scale and magnitude?"
     print(f"  - 模拟音频内容查询: '{query}'")
-
-    retrieved_chunks = db.similarity_search(
-        query,
-        k=3,
-        filter={"is_child": True}
+    
+    # 生成查询向量
+    query_embedding = embeddings.embed_query(query)
+    
+    # 执行相似性搜索
+    search_params = {
+        "metric_type": "L2",
+        "params": {
+            "ef": 64
+        }
+    }
+    
+    # 构建过滤条件
+    expr = "is_child == True"
+    
+    # 执行搜索
+    results = collection.search(
+        data=[query_embedding],
+        anns_field="embedding",
+        param=search_params,
+        limit=3,
+        expr=expr,
+        output_fields=["id", "content", "source", "page", "doc_id", "is_child", "chunk_index"]
     )
-
+    
     print("\n  - 检索到的前3个精确块为：\n")
-    if not retrieved_chunks:
+    if not results or not results[0]:
         print("    未能检索到任何相关内容。")
     else:
-        for doc in retrieved_chunks:
-            print("    内容片段: {}...".format(doc.page_content[:150].replace("\n", " ")))
-            print(f"      元数据: {doc.metadata}")
+        for i, hit in enumerate(results[0]):
+            content = hit.entity.get("content", "")
+            source = hit.entity.get("source", "")
+            page = hit.entity.get("page", 0)
+            doc_id = hit.entity.get("doc_id", "")
+            is_child = hit.entity.get("is_child", False)
+            chunk_index = hit.entity.get("chunk_index", -1)
+            
+            print(f"    内容片段: {content[:150].replace('\n', ' ')}...")
+            print(f"      元数据: {{'source': '{source}', 'page': {page}, 'doc_id': '{doc_id}', 'is_child': {is_child}, 'chunk_index': {chunk_index}}}")
+            print(f"      相似度: {hit.distance:.4f}")
             print("      " + "-" * 20)
 
 

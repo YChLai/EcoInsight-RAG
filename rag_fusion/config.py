@@ -2,16 +2,28 @@
 import os
 
 # --- 向量数据库与嵌入模型配置 ---
-VECTOR_DB_PATH = "../chroma_db_optimized"  # 指向你优化后创建的数据库
+# Chroma配置（已废弃，使用Milvus）
+VECTOR_DB_PATH = "../chroma_db_optimized"
+# Milvus配置
+MILVUS_HOST = "localhost"
+MILVUS_PORT = 19530
+MILVUS_COLLECTION = "nvidia_finance_rag"
+MILVUS_INDEX_PARAM = {
+    "index_type": "HNSW",
+    "params": {
+        "M": 8,
+        "efConstruction": 64
+    }
+}
 EMBEDDING_MODEL_NAME = "BAAI/bge-m3"
 EMBEDDING_DEVICE = "cuda"  # 如果没有GPU，可以改为 "cpu"
 
 # --- LLM 模型配置 ---
 # 用于最终答案生成的强大模型
-GENERATION_MODEL_NAME = "glm-4"
+GENERATION_MODEL_NAME = "glm-4-flash"
 # 用于查询生成的经济型模型 (RAG-Fusion步骤一)
 QUERY_GENERATION_MODEL_NAME = "glm-4-flash"
-LLM_API_KEY = os.getenv("ZHIPU_API_KEY")  # 请替换为你的 API Key
+LLM_API_KEY = os.getenv("ZHIPUAI_API_KEY")  # 请替换为你的 API Key
 
 # --- RAG Fusion 流程配置 ---
 # 在并行检索中，从摘要和子块中各取回多少个结果
