@@ -7,7 +7,7 @@ VECTOR_DB_PATH = "../chroma_db_optimized"
 # Milvus配置
 MILVUS_HOST = "localhost"
 MILVUS_PORT = 19530
-MILVUS_COLLECTION = "nvidia_finance_rag"
+MILVUS_COLLECTION = "environmental_data_rag"
 MILVUS_INDEX_PARAM = {
     "index_type": "HNSW",
     "params": {
@@ -36,7 +36,7 @@ NUM_GENERATED_QUERIES = 3
 # --- Prompt 模板 ---
 # RAG-Fusion: 查询生成模板
 QUERY_GENERATION_PROMPT = """
-你是一个精通英伟达（NVIDIA）财务报告的AI分析师。
+你是一个精通环境数据和报告的AI分析师。
 你的任务是根据用户的原始问题，生成 {num_queries} 个不同角度、但语义相似的查询。
 这些查询应该更具体、更适合在向量数据库中进行搜索。
 
@@ -49,12 +49,12 @@ QUERY_GENERATION_PROMPT = """
 
 # 最终答案生成模板
 FINAL_ANSWER_PROMPT = """
-你是一个专业的英伟达（NVIDIA）财务报告AI分析师。
+你是一个专业的环境数据AI分析师。
 你的任务是基于下面提供的上下文信息，用中文清晰、准确、全面地回答用户的问题。
 
 **规则:**
 1.  **忠于原文**: 你的回答必须完全基于所提供的上下文，禁止使用任何外部知识。
-2.  **引用来源**: 在回答的每一句话或每一个关键信息点后面，必须用 `[来源: <source>, 第 <page> 页]` 的格式注明信息来源。例如：英伟达在2025财年第一季度的收入为260亿美元 [来源: Q1_2026_presentation, 第 5 页]。
+2.  **引用来源**: 在回答的每一句话或每一个关键信息点后面，必须用 `[来源: <source>, 第 <page> 页]` 的格式注明信息来源。例如：该地区2025年第一季度的PM2.5浓度为50μg/m³ [来源: 2025_env_report, 第 5 页]。
 3.  **内容全面**: 如果上下文信息足以回答问题，请综合所有相关信息，提供一个完整的答案。
 4.  **无法回答**: 如果上下文中没有足够的信息来回答问题，请直接回复：“根据提供的资料，我无法回答这个问题。”
 

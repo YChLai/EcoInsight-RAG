@@ -14,12 +14,12 @@ PROCESSED_DATA_FOLDER = "d:\\LLM\\RAG\\Nvidia-Finance-Rag\\processed_data"
 # Milvus配置
 MILVUS_HOST = "localhost"
 MILVUS_PORT = 19530
-MILVUS_COLLECTION = "nvidia_finance_rag"
+MILVUS_COLLECTION = "environmental_data_rag"
 EMBEDDING_MODEL_NAME = "BAAI/bge-m3"
 
 # --- 初始化 LLM 用于生成摘要 ---
 try:
-    client = ZhipuAI(api_key=os.getenv("ZHIPU_API_KEY"))
+    client = ZhipuAI(api_key=os.getenv("ZHIPUAI_API_KEY"))
     print("智谱AI客户端初始化成功，将用于生成摘要。")
 except Exception as e:
     client = None
@@ -32,7 +32,7 @@ def generate_summary_with_llm(content):
         return "摘要功能未启用。"
     if len(content) < 500:
         return content
-    prompt = f"""你是一个专业的金融文档分析师。请为以下财报内容生成一个简洁、精确、信息密集的摘要，不超过150个字。摘要需要捕捉最关键的实体、数据和结论。\n\n内容如下：\n---\n{content}\n---\n\n摘要："""
+    prompt = f"""你是一个专业的环境数据分析师。请为以下环境报告内容生成一个简洁、精确、信息密集的摘要，不超过150个字。摘要需要捕捉最关键的实体、数据和结论。\n\n内容如下：\n---\n{content}\n---\n\n摘要："""
     try:
         response = client.chat.completions.create(
             model="glm-4-flash",
@@ -183,7 +183,7 @@ def create_and_persist_vector_store(docs_to_index, embeddings):
     ]
     
     # 创建集合
-    schema = CollectionSchema(fields, description="NVIDIA财务报告RAG向量库")
+    schema = CollectionSchema(fields, description="环境数据RAG向量库")
     collection = Collection(MILVUS_COLLECTION, schema)
     print(f"  - 集合创建成功: {MILVUS_COLLECTION}")
     

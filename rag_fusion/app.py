@@ -128,8 +128,8 @@ def generate_final_answer_stream(query: str, context: str):
 
 # --- Streamlit UI ---
 
-st.set_page_config(page_title="Nvidia 财报分析助手", page_icon="🤖")
-st.title("🤖 Nvidia 财报智能分析助手")
+st.set_page_config(page_title="环境数据智能分析助手", page_icon="🌱")
+st.title("🌱 环境数据智能分析助手")
 st.caption("由 RAG-Fusion 和多模态数据处理驱动")
 
 if "messages" not in st.session_state:
@@ -141,7 +141,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("请输入你关于Nvidia财报的问题..."):
+if prompt := st.chat_input("请输入你关于环境数据的问题..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -177,7 +177,7 @@ if prompt := st.chat_input("请输入你关于Nvidia财报的问题..."):
 with st.sidebar:
     st.header("应用说明")
     st.markdown("""
-    这是一个基于多模态财报数据（PDFs和音频转录）构建的高级RAG问答应用。
+    这是一个基于多模态环境数据（PDFs和音频转录）构建的高级RAG问答应用。
 
     **主要技术栈:**
     - **Streamlit**: 用于构建交互式Web界面。

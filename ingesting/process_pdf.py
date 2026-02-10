@@ -61,7 +61,7 @@ def to_markdown_table(table_data):
 
 def summarize_table_with_llm(markdown_table):
     if not ZHIPU_CLIENT: return None  # 如果客户端未初始化，则跳过
-    prompt = f"""你是一个专业的金融数据分析师。请用一段话（不超过150字）总结以下Markdown表格的核心内容和主要趋势。你的总结应该是对表格的高度概括。\n表格如下：\n{markdown_table}"""
+    prompt = f"""你是一个专业的环境数据分析师。请用一段话（不超过150字）总结以下Markdown表格的核心内容和主要趋势。你的总结应该是对表格的高度概括。\n表格如下：\n{markdown_table}"""
     try:
         response = ZHIPU_CLIENT.chat.completions.create(
             model="glm-4", messages=[{"role": "user", "content": prompt}], max_tokens=300, temperature=0.1

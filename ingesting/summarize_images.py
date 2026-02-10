@@ -9,7 +9,7 @@ API_KEY = os.getenv("ZHIPUAI_API_KEY")
 IMAGE_FOLDER = os.path.join("../processed_data", "images")
 OUTPUT_FILE = os.path.join("../processed_data", "image_summaries.json")
 
-PROMPT = """你是一位顶尖的金融分析师。请用中文详细、客观地描述这张图片。
+PROMPT = """你是一位顶尖的环境数据分析师。请用中文详细、客观地描述这张图片。
 如果它是一个图表（如折线图、柱状图），请解读其标题、X轴和Y轴的含义、数据的总体趋势、关键数据点、峰值和谷值。
 如果它是一个表格，请总结其核心内容。
 你的描述需要专业、信息密集，以便于后续的问答系统使用。
