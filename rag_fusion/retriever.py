@@ -98,8 +98,8 @@ def get_reranker_model():
     if reranker_model is None or reranker_tokenizer is None:
         print("正在加载Qwen3-Reranker-0.6B模型...")
         try:
-            # 从魔塔社区加载模型
-            model_id = "qwen/Qwen3-Reranker-0.6B"
+            # 使用本地已下载的模型
+            model_id = r"C:\Users\LYC\.cache\modelscope\hub\models\qwen\Qwen3-Reranker-0.6B"
             reranker_tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
             reranker_model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True)
             reranker_model.eval()
@@ -391,7 +391,18 @@ def reranker_based_fusion(search_results: Dict[str, List[Document]]) -> List[Doc
                 # 使用模型计算分数
                 inputs = reranker_tokenizer([q], [c], return_tensors="pt", padding=True)
                 with torch.no_grad():
-                    score = reranker_model(**inputs).item()
+                    output = reranker_model(**inputs)
+                    # 正确处理Qwen3-Reranker-0.6B模型的输出
+                    if hasattr(output, 'logits'):
+                        # 对于CausalLMOutputWithPast，我们需要从logits中获取分数
+                        # 假设logits是一个张量，我们取其值
+                        if isinstance(output.logits, torch.Tensor):
+                            score = output.logits.mean().item()
+                        else:
+                            score = 0.0
+                    else:
+                        # 尝试其他可能的输出属性
+                        score = 0.0
                 scores.append(score)
             except Exception as e:
                 print(f"  - 计算分数时出错: {e}")

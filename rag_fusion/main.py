@@ -138,7 +138,7 @@ def generate_final_answer(query: str, context: str):
 def ask_question(query: str, chat_history: List[Tuple[str, str]]):
     """执行完整的RAG问答流程（包含对话记忆）。"""
     standalone_query = rephrase_question_with_history(query, chat_history)
-    final_docs_for_context = retriever.reciprocal_rank_fusion(
+    final_docs_for_context = retriever.reranker_based_fusion(
         retriever.parallel_search(
             retriever.generate_queries(standalone_query)
         )
@@ -156,7 +156,7 @@ def ask_question(query: str, chat_history: List[Tuple[str, str]]):
 
 
 if __name__ == "__main__":
-    print("--- Nvidia 财报智能分析问答工具 (RAG-Fusion版 + 对话记忆) ---")
+    print("--- 环境数据智能分析助手 ---")
     print("--- 输入 'exit' 退出程序 ---")
 
     chat_history = []
