@@ -20,7 +20,7 @@ def get_retrieved_contexts_and_answer(query: str) -> Dict[str, any]:
     # (复用 retriever.py 和 main.py 的逻辑)
     standalone_query = query  # 假设没有聊天记录
 
-    final_docs_for_context: List[Document] = retriever.reciprocal_rank_fusion(
+    final_docs_for_context: List[Document] = retriever.reranker_based_fusion(
         retriever.parallel_search(
             retriever.generate_queries(standalone_query)
         )

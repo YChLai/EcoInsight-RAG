@@ -10,6 +10,9 @@ from pymilvus import connections, Collection, utility
 from rank_bm25 import BM25Okapi
 import config
 import jieba
+import torch
+
+from modelscope import AutoModelForCausalLM, AutoTokenizer
 
 # --- 全局变量，用于缓存 ---
 db_client = None
@@ -17,6 +20,9 @@ embedding_model = None
 llm_client = None
 bm25_index = None
 bm25_docs = None
+# Reranker模型
+reranker_model = None
+reranker_tokenizer = None
 
 
 def get_llm_client():
@@ -84,6 +90,24 @@ def get_bm25_index():
         bm25_index = BM25Okapi(tokenized_corpus)
         print(f"BM25索引构建完成，包含 {len(bm25_docs)} 个文档")
     return bm25_index, bm25_docs
+
+
+def get_reranker_model():
+    """获取Qwen3-Reranker-0.6B模型的单例。"""
+    global reranker_model, reranker_tokenizer
+    if reranker_model is None or reranker_tokenizer is None:
+        print("正在加载Qwen3-Reranker-0.6B模型...")
+        try:
+            # 从魔塔社区加载模型
+            model_id = "qwen/Qwen3-Reranker-0.6B"
+            reranker_tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
+            reranker_model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True)
+            reranker_model.eval()
+            print("Qwen3-Reranker-0.6B模型加载成功！")
+        except Exception as e:
+            print(f"加载reranker模型失败: {e}")
+            exit()
+    return reranker_model, reranker_tokenizer
 
 
 def tokenize_text(text):
@@ -316,36 +340,82 @@ def _bm25_search(query, bm25_index, bm25_docs, k=5):
 
 
 
-def reciprocal_rank_fusion(search_results: Dict[str, List[Document]], k: int = 60) -> List[Document]:
+def reranker_based_fusion(search_results: Dict[str, List[Document]]) -> List[Document]:
     """
-    对并行搜索的结果进行RRF重排。
-    返回一个按RRF分数排序的、去重的文档列表。
+    使用Qwen3-Reranker-0.6B对并行搜索的结果进行重排。
+    返回一个按reranker分数排序的、去重的文档列表。
     """
-    print("\n--- 步骤 3: RRF 结果融合与重排 ---")
+    print("\n--- 步骤 3: 使用Qwen3-Reranker-0.6B进行结果融合与重排 ---")
 
-    # 1. 计算每个文档的RRF分数
-    fused_scores = {}
+    # 获取reranker模型
+    reranker_model, reranker_tokenizer = get_reranker_model()
+
+    # 1. 收集所有唯一文档
+    unique_docs = {}
     for query, docs in search_results.items():
-        for rank, doc in enumerate(docs):
+        for doc in docs:
             # 使用 doc_id 和 chunk_index (如果有) 创建唯一标识符
             doc_id = doc.metadata.get('doc_id')
             chunk_index = doc.metadata.get('chunk_index', -1)  # -1 表示摘要
             unique_id = f"{doc_id}-{chunk_index}"
+            if unique_id not in unique_docs:
+                unique_docs[unique_id] = doc
 
+    # 2. 准备reranker输入
+    queries = list(search_results.keys())
+    docs_list = list(unique_docs.values())
+    
+    if not docs_list:
+        print("  - 没有检索到任何文档。")
+        return []
+
+    print(f"  - 共有 {len(docs_list)} 个唯一文档需要重排序。")
+
+    # 3. 使用reranker对文档进行排序
+    # 对于每个查询，单独排序，然后融合结果
+    fused_scores = {}
+    for query in queries:
+        print(f"  - 正在使用查询 '{query}' 对文档进行重排序...")
+        
+        # 准备输入对
+        inputs = []
+        for doc in docs_list:
+            # 构建查询-文档对
+            context = doc.page_content[:1000]  # 限制上下文长度
+            inputs.append((query, context))
+        
+        # 使用reranker模型计算相关性分数
+        scores = []
+        for q, c in inputs:
+            try:
+                # 使用模型计算分数
+                inputs = reranker_tokenizer([q], [c], return_tensors="pt", padding=True)
+                with torch.no_grad():
+                    score = reranker_model(**inputs).item()
+                scores.append(score)
+            except Exception as e:
+                print(f"  - 计算分数时出错: {e}")
+                scores.append(0.0)
+        
+        # 记录分数
+        for i, doc in enumerate(docs_list):
+            doc_id = doc.metadata.get('doc_id')
+            chunk_index = doc.metadata.get('chunk_index', -1)
+            unique_id = f"{doc_id}-{chunk_index}"
+            
             if unique_id not in fused_scores:
                 fused_scores[unique_id] = {'score': 0, 'doc': doc}
+            
+            fused_scores[unique_id]['score'] += scores[i]
 
-            # RRF核心公式
-            fused_scores[unique_id]['score'] += 1.0 / (rank + k)
-
-    # 2. 按分数排序
+    # 4. 按分数排序
     reranked_results = sorted(
         fused_scores.values(),
         key=lambda x: x['score'],
         reverse=True
     )
 
-    # 3. 提取排序后的文档并去重 (按父文档ID)
+    # 5. 提取排序后的文档并去重 (按父文档ID)
     final_docs = []
     seen_parent_ids = set()
     for item in reranked_results:
@@ -360,7 +430,7 @@ def reciprocal_rank_fusion(search_results: Dict[str, List[Document]], k: int = 6
 
 def retrieve_final_context(query: str, top_n: int = 3) -> List[Document]:
     """
-    完整的检索流程：查询生成 -> 并行搜索 -> RRF重排。
+    完整的检索流程：查询生成 -> 并行搜索 -> Reranker重排。
     返回最终用于生成答案的、最相关的父文档。
     """
     # 步骤1: 查询生成
@@ -369,8 +439,8 @@ def retrieve_final_context(query: str, top_n: int = 3) -> List[Document]:
     # 步骤2: 并行搜索
     search_results = parallel_search(all_queries)
 
-    # 步骤3: RRF重排
-    reranked_docs = reciprocal_rank_fusion(search_results, k=config.RRF_K)
+    # 步骤3: 使用Qwen3-Reranker-0.6B重排
+    reranked_docs = reranker_based_fusion(search_results)
 
     # 步骤4: 提取最终的父文档上下文
     # 我们需要加载完整的父文档内容

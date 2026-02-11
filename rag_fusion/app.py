@@ -150,7 +150,7 @@ if prompt := st.chat_input("请输入你关于环境数据的问题..."):
         standalone_query = rephrase_question_with_history(prompt, st.session_state.chat_history)
 
         with st.spinner("正在执行RAG-Fusion检索..."):
-            final_docs_for_context = retriever.reciprocal_rank_fusion(
+            final_docs_for_context = retriever.reranker_based_fusion(
                 retriever.parallel_search(
                     retriever.generate_queries(standalone_query)
                 )

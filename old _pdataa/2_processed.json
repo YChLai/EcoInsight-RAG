@@ -1,0 +1,34 @@
+[
+    {
+        "type": "image_placeholder",
+        "content": "[IMAGE: 2_page1_img2.png]",
+        "metadata": {
+            "source": "2.pdf",
+            "page": 1
+        }
+    },
+    {
+        "type": "image_placeholder",
+        "content": "[IMAGE: 2_page1_img4.png]",
+        "metadata": {
+            "source": "2.pdf",
+            "page": 1
+        }
+    },
+    {
+        "type": "image_placeholder",
+        "content": "[IMAGE: 2_page1_img5.png]",
+        "metadata": {
+            "source": "2.pdf",
+            "page": 1
+        }
+    },
+    {
+        "type": "image_placeholder",
+        "content": "[IMAGE: 2_page2_img0.png]",
+        "metadata": {
+            "source": "2.pdf",
+            "page": 2
+        }
+    }
+]

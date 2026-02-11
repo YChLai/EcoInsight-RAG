@@ -6,7 +6,7 @@ import time
 
 API_KEY = os.getenv("ZHIPUAI_API_KEY")
 
-IMAGE_FOLDER = os.path.join("../processed_data", "images")
+OUTPUT_BASE_DIR = os.path.join(".", "output")
 OUTPUT_FILE = os.path.join("../processed_data", "image_summaries.json")
 
 PROMPT = """你是一位顶尖的环境数据分析师。请用中文详细、客观地描述这张图片。
@@ -62,13 +62,35 @@ def summarize_and_clean():
             valuable_summaries = json.load(f)
         print(f"已加载 {len(valuable_summaries)} 条已存在的有效摘要。")
 
-    all_files = [f for f in os.listdir(IMAGE_FOLDER) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-    images_to_process = [f for f in all_files if f not in valuable_summaries]
+    # 遍历所有PDF子目录，查找imgs文件夹
+    all_images = []
+    for pdf_dir in os.listdir(OUTPUT_BASE_DIR):
+        pdf_path = os.path.join(OUTPUT_BASE_DIR, pdf_dir)
+        if os.path.isdir(pdf_path):
+            # 查找imgs文件夹
+            for root, dirs, files in os.walk(pdf_path):
+                if 'imgs' in dirs:
+                    imgs_dir = os.path.join(root, 'imgs')
+                    # 收集所有图片文件
+                    for img_file in os.listdir(imgs_dir):
+                        if img_file.lower().endswith(('.png', '.jpg', '.jpeg')):
+                            # 跳过带有header或footer的图片
+                            if 'header' in img_file.lower() or 'footer' in img_file.lower():
+                                continue
+                            img_path = os.path.join(imgs_dir, img_file)
+                            all_images.append(img_path)
 
-    print(f"共发现 {len(all_files)} 张图片，还需处理 {len(images_to_process)} 张。")
+    # 过滤出需要处理的图片
+    images_to_process = []
+    for img_path in all_images:
+        img_name = os.path.basename(img_path)
+        if img_name not in valuable_summaries:
+            images_to_process.append(img_path)
 
-    for index, filename in enumerate(images_to_process):
-        image_path = os.path.join(IMAGE_FOLDER, filename)
+    print(f"共发现 {len(all_images)} 张图片，还需处理 {len(images_to_process)} 张。")
+
+    for index, image_path in enumerate(images_to_process):
+        filename = os.path.basename(image_path)
         try:
             base64_image = encode_image_to_base64(image_path)
             print(f"正在处理图片 ({index + 1}/{len(images_to_process)}): {filename}...")

@@ -1,0 +1,18 @@
+[
+    {
+        "type": "image_placeholder",
+        "content": "[IMAGE: 4_page1_img2.png]",
+        "metadata": {
+            "source": "4.pdf",
+            "page": 1
+        }
+    },
+    {
+        "type": "image_placeholder",
+        "content": "[IMAGE: 4_page1_img4.png]",
+        "metadata": {
+            "source": "4.pdf",
+            "page": 1
+        }
+    }
+]

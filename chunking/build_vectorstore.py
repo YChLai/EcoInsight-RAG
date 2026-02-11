@@ -279,8 +279,7 @@ def verify_retrieval(embeddings):
     collection.load()
     
     # 验证一个来自音频转录稿的查询
-    query = "are there other that have yet to be announced of the same kind of scale and magnitude?"
-    print(f"  - 模拟音频内容查询: '{query}'")
+    query = "我国核电步入建设投运“双高峰”的第一年是哪一年？"
     
     # 生成查询向量
     query_embedding = embeddings.embed_query(query)

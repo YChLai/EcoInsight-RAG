@@ -1,0 +1,1042 @@
+{
+    "input_path": "..\\data\\2.pdf",
+    "page_index": 0,
+    "page_count": 2,
+    "width": 1191,
+    "height": 1684,
+    "model_settings": {
+        "use_doc_preprocessor": false,
+        "use_layout_detection": true,
+        "use_chart_recognition": false,
+        "use_seal_recognition": false,
+        "use_ocr_for_image_block": false,
+        "format_block_content": false,
+        "merge_layout_blocks": true,
+        "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+        ],
+        "return_layout_polygon_points": true
+    },
+    "parsing_res_list": [
+        {
+            "block_label": "header_image",
+            "block_content": "",
+            "block_bbox": [
+                54,
+                86,
+                556,
+                156
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "global_block_id": 0,
+            "global_group_id": 0,
+            "block_polygon_points": [
+                [
+                    54.0,
+                    86.0
+                ],
+                [
+                    556.0,
+                    86.0
+                ],
+                [
+                    556.0,
+                    156.0
+                ],
+                [
+                    54.0,
+                    156.0
+                ]
+            ]
+        },
+        {
+            "block_label": "header_image",
+            "block_content": "",
+            "block_bbox": [
+                996,
+                71,
+                1096,
+                91
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "global_block_id": 1,
+            "global_group_id": 1,
+            "block_polygon_points": [
+                [
+                    996.0,
+                    71.0
+                ],
+                [
+                    1095.0,
+                    71.0
+                ],
+                [
+                    1095.0,
+                    90.0
+                ],
+                [
+                    996.0,
+                    90.0
+                ]
+            ]
+        },
+        {
+            "block_label": "number",
+            "block_content": "EN",
+            "block_bbox": [
+                1112,
+                72,
+                1136,
+                90
+            ],
+            "block_id": 2,
+            "block_order": null,
+            "group_id": 2,
+            "global_block_id": 2,
+            "global_group_id": 2,
+            "block_polygon_points": [
+                [
+                    1112.0,
+                    72.0
+                ],
+                [
+                    1135.0,
+                    72.0
+                ],
+                [
+                    1135.0,
+                    89.0
+                ],
+                [
+                    1112.0,
+                    89.0
+                ]
+            ]
+        },
+        {
+            "block_label": "header",
+            "block_content": "请输入您要搜索的内容",
+            "block_bbox": [
+                783,
+                115,
+                949,
+                137
+            ],
+            "block_id": 3,
+            "block_order": null,
+            "group_id": 3,
+            "global_block_id": 3,
+            "global_group_id": 3,
+            "block_polygon_points": [
+                [
+                    783.0,
+                    115.0
+                ],
+                [
+                    948.0,
+                    115.0
+                ],
+                [
+                    948.0,
+                    136.0
+                ],
+                [
+                    783.0,
+                    136.0
+                ]
+            ]
+        },
+        {
+            "block_label": "text",
+            "block_content": "热门搜索：环境影响评价 空气质量",
+            "block_bbox": [
+                730,
+                153,
+                965,
+                174
+            ],
+            "block_id": 4,
+            "block_order": 1,
+            "group_id": 4,
+            "global_block_id": 4,
+            "global_group_id": 4,
+            "block_polygon_points": [
+                [
+                    730.0,
+                    153.0
+                ],
+                [
+                    964.0,
+                    153.0
+                ],
+                [
+                    964.0,
+                    173.0
+                ],
+                [
+                    730.0,
+                    173.0
+                ]
+            ]
+        },
+        {
+            "block_label": "header",
+            "block_content": "搜索",
+            "block_bbox": [
+                1010,
+                116,
+                1048,
+                136
+            ],
+            "block_id": 5,
+            "block_order": null,
+            "group_id": 5,
+            "global_block_id": 5,
+            "global_group_id": 5,
+            "block_polygon_points": [
+                [
+                    1010.0,
+                    116.0
+                ],
+                [
+                    1047.0,
+                    116.0
+                ],
+                [
+                    1047.0,
+                    135.0
+                ],
+                [
+                    1010.0,
+                    135.0
+                ]
+            ]
+        },
+        {
+            "block_label": "text",
+            "block_content": "要闻动态",
+            "block_bbox": [
+                58,
+                220,
+                205,
+                259
+            ],
+            "block_id": 6,
+            "block_order": 2,
+            "group_id": 6,
+            "global_block_id": 6,
+            "global_group_id": 6,
+            "block_polygon_points": [
+                [
+                    58.0,
+                    220.0
+                ],
+                [
+                    205.0,
+                    220.0
+                ],
+                [
+                    205.0,
+                    259.0
+                ],
+                [
+                    58.0,
+                    259.0
+                ]
+            ]
+        },
+        {
+            "block_label": "header_image",
+            "block_content": "",
+            "block_bbox": [
+                1099,
+                115,
+                1133,
+                154
+            ],
+            "block_id": 7,
+            "block_order": null,
+            "group_id": 7,
+            "global_block_id": 7,
+            "global_group_id": 7,
+            "block_polygon_points": [
+                [
+                    1099.0,
+                    115.0
+                ],
+                [
+                    1132.0,
+                    115.0
+                ],
+                [
+                    1132.0,
+                    153.0
+                ],
+                [
+                    1099.0,
+                    153.0
+                ]
+            ]
+        },
+        {
+            "block_label": "text",
+            "block_content": "前位置：首页 > 要闻动态 > 环境要闻",
+            "block_bbox": [
+                68,
+                269,
+                345,
+                292
+            ],
+            "block_id": 8,
+            "block_order": 3,
+            "group_id": 8,
+            "global_block_id": 8,
+            "global_group_id": 8,
+            "block_polygon_points": [
+                [
+                    68.0,
+                    269.0
+                ],
+                [
+                    345.0,
+                    269.0
+                ],
+                [
+                    345.0,
+                    292.0
+                ],
+                [
+                    68.0,
+                    292.0
+                ]
+            ]
+        },
+        {
+            "block_label": "doc_title",
+            "block_content": "2026年核与辐射安全监管工作推进会召开",
+            "block_bbox": [
+                368,
+                400,
+                948,
+                437
+            ],
+            "block_id": 9,
+            "block_order": 4,
+            "group_id": 9,
+            "global_block_id": 9,
+            "global_group_id": 9,
+            "block_polygon_points": [
+                [
+                    368.0,
+                    400.0
+                ],
+                [
+                    948.0,
+                    400.0
+                ],
+                [
+                    948.0,
+                    437.0
+                ],
+                [
+                    368.0,
+                    437.0
+                ]
+            ]
+        },
+        {
+            "block_label": "text",
+            "block_content": "2026-02-04 来源：生态环境部",
+            "block_bbox": [
+                135,
+                496,
+                389,
+                519
+            ],
+            "block_id": 10,
+            "block_order": 5,
+            "group_id": 10,
+            "global_block_id": 10,
+            "global_group_id": 10,
+            "block_polygon_points": [
+                [
+                    135.0,
+                    496.0
+                ],
+                [
+                    389.0,
+                    496.0
+                ],
+                [
+                    389.0,
+                    519.0
+                ],
+                [
+                    135.0,
+                    519.0
+                ]
+            ]
+        },
+        {
+            "block_label": "text",
+            "block_content": "字号：[大][中][小][打印]",
+            "block_bbox": [
+                887,
+                496,
+                1136,
+                520
+            ],
+            "block_id": 11,
+            "block_order": 6,
+            "group_id": 11,
+            "global_block_id": 11,
+            "global_group_id": 11,
+            "block_polygon_points": [
+                [
+                    887.0,
+                    496.0
+                ],
+                [
+                    1136.0,
+                    496.0
+                ],
+                [
+                    1136.0,
+                    520.0
+                ],
+                [
+                    887.0,
+                    520.0
+                ]
+            ]
+        },
+        {
+            "block_label": "text",
+            "block_content": "2月3日，生态环境部（国家核安全局）组织召开2026年核与辐射安全监管工作推进会，深入贯彻落实全国生态环境保护工议、核与辐射安全监管工作会议精神，总结2025年工作，系统推进现代化核安全监管体系建设、部署2026年重点任务。生态环部副部长、国家核安全局局长董保同出席会议并讲话。",
+            "block_bbox": [
+                132,
+                571,
+                1143,
+                670
+            ],
+            "block_id": 12,
+            "block_order": 7,
+            "group_id": 12,
+            "global_block_id": 12,
+            "global_group_id": 12,
+            "block_polygon_points": [
+                [
+                    132.0,
+                    571.0
+                ],
+                [
+                    1143.0,
+                    571.0
+                ],
+                [
+                    1143.0,
+                    670.0
+                ],
+                [
+                    132.0,
+                    670.0
+                ]
+            ]
+        },
+        {
+            "block_label": "image",
+            "block_content": "",
+            "block_bbox": [
+                255,
+                689,
+                1056,
+                1111
+            ],
+            "block_id": 13,
+            "block_order": null,
+            "group_id": 13,
+            "global_block_id": 13,
+            "global_group_id": 13,
+            "block_polygon_points": [
+                [
+                    255.0,
+                    689.0
+                ],
+                [
+                    1056.0,
+                    689.0
+                ],
+                [
+                    1056.0,
+                    1111.0
+                ],
+                [
+                    255.0,
+                    1111.0
+                ]
+            ]
+        },
+        {
+            "block_label": "text",
+            "block_content": "2025年，在部党组的坚强领导下，核与辐射安全监管各部门和单位守正创新落实习近平总书记重要批示精神和党中央重要部署、严格监管保障核事业高质量发展、固本强基提升核安全监管能力、统筹协调增强核安全治理效能，各方面工作均取得新成效。",
+            "block_bbox": [
+                132,
+                1148,
+                1142,
+                1246
+            ],
+            "block_id": 14,
+            "block_order": 8,
+            "group_id": 14,
+            "global_block_id": 14,
+            "global_group_id": 14,
+            "block_polygon_points": [
+                [
+                    132.0,
+                    1148.0
+                ],
+                [
+                    1142.0,
+                    1148.0
+                ],
+                [
+                    1142.0,
+                    1246.0
+                ],
+                [
+                    132.0,
+                    1246.0
+                ]
+            ]
+        },
+        {
+            "block_label": "text",
+            "block_content": "2026年是“十五五”开局之年，也是我国核电步入建设投运“双高峰”的第一年。要全面落实习近平总书记重要批示精神彻党的二十大和二十届历次全会精神，深入贯彻习近平生态文明思想和总体国家安全观、核安全观，以实现高水平核安全为目标以夯实核安全主体责任为基础，以化解消除核安全风险隐患为关键，以持续提升核安全基础能力为支撑，以高质量党建为保障，实推进“十五五”核安全规划印发实施、核安全监管力量决策部署落实、法规标准体系现代化建设、重点项目和核设施安全监督辐射安全与环境监管等工作，加快建成同我国核事业发展相适应的现代化核安全监管体系，确保“十五五”核与辐射安全监管量开局。",
+            "block_bbox": [
+                132,
+                1274,
+                1143,
+                1481
+            ],
+            "block_id": 15,
+            "block_order": 9,
+            "group_id": 15,
+            "global_block_id": 15,
+            "global_group_id": 15,
+            "block_polygon_points": [
+                [
+                    132.0,
+                    1274.0
+                ],
+                [
+                    1143.0,
+                    1274.0
+                ],
+                [
+                    1143.0,
+                    1481.0
+                ],
+                [
+                    132.0,
+                    1481.0
+                ]
+            ]
+        }
+    ],
+    "layout_det_res": {
+        "input_path": null,
+        "page_index": null,
+        "boxes": [
+            {
+                "cls_id": 13,
+                "label": "header_image",
+                "score": 0.8606276512145996,
+                "coordinate": [
+                    54,
+                    86,
+                    556,
+                    156
+                ],
+                "order": null,
+                "polygon_points": [
+                    [
+                        54.0,
+                        86.0
+                    ],
+                    [
+                        556.0,
+                        86.0
+                    ],
+                    [
+                        556.0,
+                        156.0
+                    ],
+                    [
+                        54.0,
+                        156.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 13,
+                "label": "header_image",
+                "score": 0.4678771197795868,
+                "coordinate": [
+                    996,
+                    71,
+                    1096,
+                    91
+                ],
+                "order": null,
+                "polygon_points": [
+                    [
+                        996.0,
+                        71.0
+                    ],
+                    [
+                        1095.0,
+                        71.0
+                    ],
+                    [
+                        1095.0,
+                        90.0
+                    ],
+                    [
+                        996.0,
+                        90.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 16,
+                "label": "number",
+                "score": 0.5544303059577942,
+                "coordinate": [
+                    1112,
+                    72,
+                    1136,
+                    90
+                ],
+                "order": 1,
+                "polygon_points": [
+                    [
+                        1112.0,
+                        72.0
+                    ],
+                    [
+                        1135.0,
+                        72.0
+                    ],
+                    [
+                        1135.0,
+                        89.0
+                    ],
+                    [
+                        1112.0,
+                        89.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 12,
+                "label": "header",
+                "score": 0.6221036314964294,
+                "coordinate": [
+                    783,
+                    115,
+                    949,
+                    137
+                ],
+                "order": null,
+                "polygon_points": [
+                    [
+                        783.0,
+                        115.0
+                    ],
+                    [
+                        948.0,
+                        115.0
+                    ],
+                    [
+                        948.0,
+                        136.0
+                    ],
+                    [
+                        783.0,
+                        136.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 22,
+                "label": "text",
+                "score": 0.4922860860824585,
+                "coordinate": [
+                    730,
+                    153,
+                    965,
+                    174
+                ],
+                "order": 2,
+                "polygon_points": [
+                    [
+                        730.0,
+                        153.0
+                    ],
+                    [
+                        964.0,
+                        153.0
+                    ],
+                    [
+                        964.0,
+                        173.0
+                    ],
+                    [
+                        730.0,
+                        173.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 12,
+                "label": "header",
+                "score": 0.4138222932815552,
+                "coordinate": [
+                    1010,
+                    116,
+                    1048,
+                    136
+                ],
+                "order": null,
+                "polygon_points": [
+                    [
+                        1010.0,
+                        116.0
+                    ],
+                    [
+                        1047.0,
+                        116.0
+                    ],
+                    [
+                        1047.0,
+                        135.0
+                    ],
+                    [
+                        1010.0,
+                        135.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 22,
+                "label": "text",
+                "score": 0.3875153362751007,
+                "coordinate": [
+                    58,
+                    220,
+                    205,
+                    259
+                ],
+                "order": 3,
+                "polygon_points": [
+                    [
+                        58.0,
+                        220.0
+                    ],
+                    [
+                        205.0,
+                        220.0
+                    ],
+                    [
+                        205.0,
+                        259.0
+                    ],
+                    [
+                        58.0,
+                        259.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 13,
+                "label": "header_image",
+                "score": 0.5112842321395874,
+                "coordinate": [
+                    1099,
+                    115,
+                    1133,
+                    154
+                ],
+                "order": null,
+                "polygon_points": [
+                    [
+                        1099.0,
+                        115.0
+                    ],
+                    [
+                        1132.0,
+                        115.0
+                    ],
+                    [
+                        1132.0,
+                        153.0
+                    ],
+                    [
+                        1099.0,
+                        153.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 22,
+                "label": "text",
+                "score": 0.7421399354934692,
+                "coordinate": [
+                    68,
+                    269,
+                    345,
+                    292
+                ],
+                "order": 4,
+                "polygon_points": [
+                    [
+                        68.0,
+                        269.0
+                    ],
+                    [
+                        345.0,
+                        269.0
+                    ],
+                    [
+                        345.0,
+                        292.0
+                    ],
+                    [
+                        68.0,
+                        292.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 6,
+                "label": "doc_title",
+                "score": 0.8988248109817505,
+                "coordinate": [
+                    368,
+                    400,
+                    948,
+                    437
+                ],
+                "order": 5,
+                "polygon_points": [
+                    [
+                        368.0,
+                        400.0
+                    ],
+                    [
+                        948.0,
+                        400.0
+                    ],
+                    [
+                        948.0,
+                        437.0
+                    ],
+                    [
+                        368.0,
+                        437.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 22,
+                "label": "text",
+                "score": 0.7897959351539612,
+                "coordinate": [
+                    135,
+                    496,
+                    389,
+                    519
+                ],
+                "order": 6,
+                "polygon_points": [
+                    [
+                        135.0,
+                        496.0
+                    ],
+                    [
+                        389.0,
+                        496.0
+                    ],
+                    [
+                        389.0,
+                        519.0
+                    ],
+                    [
+                        135.0,
+                        519.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 22,
+                "label": "text",
+                "score": 0.8103712201118469,
+                "coordinate": [
+                    887,
+                    496,
+                    1136,
+                    520
+                ],
+                "order": 7,
+                "polygon_points": [
+                    [
+                        887.0,
+                        496.0
+                    ],
+                    [
+                        1136.0,
+                        496.0
+                    ],
+                    [
+                        1136.0,
+                        520.0
+                    ],
+                    [
+                        887.0,
+                        520.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 22,
+                "label": "text",
+                "score": 0.9445101022720337,
+                "coordinate": [
+                    132,
+                    571,
+                    1143,
+                    670
+                ],
+                "order": 8,
+                "polygon_points": [
+                    [
+                        132.0,
+                        571.0
+                    ],
+                    [
+                        1143.0,
+                        571.0
+                    ],
+                    [
+                        1143.0,
+                        670.0
+                    ],
+                    [
+                        132.0,
+                        670.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 14,
+                "label": "image",
+                "score": 0.9819692969322205,
+                "coordinate": [
+                    255,
+                    689,
+                    1056,
+                    1111
+                ],
+                "order": null,
+                "polygon_points": [
+                    [
+                        255.0,
+                        689.0
+                    ],
+                    [
+                        1056.0,
+                        689.0
+                    ],
+                    [
+                        1056.0,
+                        1111.0
+                    ],
+                    [
+                        255.0,
+                        1111.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 22,
+                "label": "text",
+                "score": 0.9289159774780273,
+                "coordinate": [
+                    132,
+                    1148,
+                    1142,
+                    1246
+                ],
+                "order": 9,
+                "polygon_points": [
+                    [
+                        132.0,
+                        1148.0
+                    ],
+                    [
+                        1142.0,
+                        1148.0
+                    ],
+                    [
+                        1142.0,
+                        1246.0
+                    ],
+                    [
+                        132.0,
+                        1246.0
+                    ]
+                ]
+            },
+            {
+                "cls_id": 22,
+                "label": "text",
+                "score": 0.9637757539749146,
+                "coordinate": [
+                    132,
+                    1274,
+                    1143,
+                    1481
+                ],
+                "order": 10,
+                "polygon_points": [
+                    [
+                        132.0,
+                        1274.0
+                    ],
+                    [
+                        1143.0,
+                        1274.0
+                    ],
+                    [
+                        1143.0,
+                        1481.0
+                    ],
+                    [
+                        132.0,
+                        1481.0
+                    ]
+                ]
+            }
+        ]
+    }
+}
