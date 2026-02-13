@@ -7,8 +7,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from zhipuai import ZhipuAI
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
 
-MD_DIR = "../preprocess/output_merged"
-DATA_DIR = "../processed_data"
+MD_DIR = "../processed_data"
 MILVUS_HOST = "localhost"
 MILVUS_PORT = 19530
 MILVUS_COLLECTION = "env_rag"
@@ -35,15 +34,42 @@ def load_docs():
         print(f"目录不存在: {MD_DIR}")
         return []
     
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=250, separators=["\n\n", "\n", " ", ""])
+    images = {}
+    img_file = os.path.join(MD_DIR, "images.json")
+    if os.path.exists(img_file):
+        images = json.load(open(img_file, 'r', encoding='utf-8'))
+    
     docs = []
     
-    for md in [f for f in os.listdir(MD_DIR) if f.endswith(".md")]:
-        with open(os.path.join(MD_DIR, md), 'r', encoding='utf-8') as f:
-            content = f.read()
+    for filename in sorted(os.listdir(MD_DIR)):
+        if not filename.endswith(".json") or filename == "images.json":
+            continue
         
-        for i, chunk in enumerate(splitter.split_text(content)):
-            docs.append(Document(page_content=chunk, metadata={"source": md.replace(".md", ""), "page": i + 1, "doc_id": str(uuid.uuid4())}))
+        filepath = os.path.join(MD_DIR, filename)
+        blocks = json.load(open(filepath, 'r', encoding='utf-8'))
+        
+        pages = {}
+        for block in blocks:
+            page = block["metadata"]["page"]
+            pages.setdefault(page, [])
+            content = block["content"]
+            if block["type"] == "image":
+                img_name = content.replace("[IMAGE: ", "").replace("]", "")
+                img_desc = images.get(img_name, "")
+                content = f"[图片: {img_name}]\n{img_desc}"
+            pages[page].append(content)
+        
+        for page, contents in sorted(pages.items()):
+            full_content = "\n\n".join(contents)
+            if len(full_content.strip()) > 50:
+                docs.append(Document(
+                    page_content=full_content,
+                    metadata={
+                        "source": filename.replace(".json", ""),
+                        "page": page,
+                        "doc_id": str(uuid.uuid4())
+                    }
+                ))
     
     print(f"创建 {len(docs)} 个文档")
     return docs
