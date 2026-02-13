@@ -1,4 +1,4 @@
-# 🌱 环境数据智能分析助手
+# 环境数据智能分析助手
 
 基于 RAG-Fusion 的环境政务文档问答系统，支持多模态数据处理与检索增强生成。
 
@@ -31,45 +31,10 @@
 ├── finetune/            # 微调数据准备
 │   ├── generate_qa.py   # 生成QA对
 │   └── mine_negatives.py # 挖掘负样本
+└── eval_data.json       # 评估数据集
 ```
 
 ## 技术栈
-
-```mermaid
-graph TD
-    subgraph 数据层
-    A[PDF解析
-PaddleOCR-VL-1.5]
-    B[音频转录
-faster-whisper]
-    C[图像理解
-GLM-4.6V-Flash]
-    end
-    
-    subgraph 索引层
-    D[嵌入模型
-BAAI/bge-m3]
-    E[向量数据库
-Milvus HNSW]
-    F[文本检索
-BM25]
-    end
-    
-    subgraph 推理层
-    G[LLM
-GLM-4-Flash]
-    H[Reranker
-Qwen3-Reranker-0.6B]
-    end
-    
-    A --> D
-    B --> D
-    C --> D
-    D --> E
-    E --> H
-    F --> H
-    H --> G
-```
 
 | 组件 | 技术 |
 |------|------|
@@ -126,29 +91,11 @@ streamlit run app.py
 
 ## 核心流程
 
-```mermaid
-flowchart TD
-    A[用户查询] --> B[查询扩展
-生成3个不同角度的查询]
-    B --> C[混合检索
-HNSW + BM25]
-    C --> D[Reranker重排
-Qwen3-Reranker-0.6B]
-    D --> E[构建上下文
-前3个文档]
-    E --> F[生成答案
-GLM-4-Flash]
-    
-    subgraph 检索层
-    C
-    D
-    end
-    
-    subgraph 生成层
-    E
-    F
-    end
-```
+1. **用户查询** → 查询扩展（生成3个不同角度的查询）
+2. **混合检索**（HNSW 向量检索 + BM25 文本检索）
+3. **Reranker 重排**（Qwen3-Reranker-0.6B）
+4. **构建上下文**（前3个文档）
+5. **生成答案**（GLM-4-Flash）
 
 ## 评估指标
 
