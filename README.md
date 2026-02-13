@@ -31,7 +31,9 @@
 ├── finetune/            # 微调数据准备
 │   ├── generate_qa.py   # 生成QA对
 │   └── mine_negatives.py # 挖掘负样本
-└── eval_data.json       # 评估数据集
+├── requirements.txt
+├── README.md
+└── .gitignore
 ```
 
 ## 技术栈
