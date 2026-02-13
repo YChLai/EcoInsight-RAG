@@ -1,8 +1,30 @@
-/processed_data/
+# Data
 /data/
-/chroma_db_optimized/
-/old_pdata/
-/ingestnew/output/
-/ingestnew/output_merged/
-/sftranker/qa_pairs.json
-/sftranker/qwen3_emb_train.json
+/processed_data/
+
+# Preprocess output
+/preprocess/output/
+/preprocess/output_merged/
+
+# Model cache
+__pycache__/
+*.pyc
+*.pyo
+.idea/
+
+# Generated files
+/finetune/qa.json
+/finetune/train.json
+/finetune/new.json
+/finetune/qa_pairs.txt
+/rag/results.json
+/rag/report.csv
+
+# Environment
+.venv/
+venv/
+.env
+
+# OS
+.DS_Store
+Thumbs.db
